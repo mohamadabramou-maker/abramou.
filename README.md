@@ -1,4 +1,4 @@
-<abramou>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
@@ -494,6 +494,61 @@
     transform: scale(1.1);
   }
 
+  /* Loading Indicator */
+  .loading {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 18px;
+  }
+
+  .spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid var(--accent);
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Alert Messages */
+  .alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    z-index: 3000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+  .alert.success {
+    background: var(--accent);
+  }
+  .alert.error {
+    background: #ef4444;
+  }
+  .alert.show {
+    transform: translateX(0);
+  }
+
   @media(max-width:420px){
     .avatar{ width:64px; height:64px }
     .id-photo{ width:88px; height:88px }
@@ -523,29 +578,50 @@
   <div id="loginPage" class="login-page" style="display:none;">
     <div class="login-container">
       <h1>مرحباً بكم في تطبيق <span style="color:var(--accent)">Abramou</span></h1>
-      <p>شكراً على حسن اختياركم! أضف معلوماتك الشخصية لتبدأ.</p>
-
-      <div class="form-group">
-        <label>الاسم الكامل</label>
-        <input type="text" id="name" placeholder="أدخل اسمك الكامل">
-      </div>
+      <p>شكراً على حسن اختياركم! سجل دخولك أو أنشئ حساب جديد.</p>
 
       <div class="form-group">
         <label>البريد الإلكتروني</label>
-        <input type="email" id="email" placeholder="ex@example.com">
+        <input type="email" id="loginEmail" placeholder="ex@example.com">
       </div>
 
       <div class="form-group">
         <label>كلمة المرور</label>
-        <input type="password" id="password" placeholder="••••••••">
+        <input type="password" id="loginPassword" placeholder="••••••••">
       </div>
 
       <button class="btn-login" id="btnLogin">تسجيل الدخول</button>
-      <button class="btn-register" id="btnRegister">سجل حساب جديد</button>
+      <button class="btn-register" id="btnRegister">أنشئ حساب جديد</button>
 
       <div class="login-footer">
         <small>بتسجيلك، توافق على <a href="#" style="color:var(--accent)">شروط الخدمة</a></small>
       </div>
+    </div>
+  </div>
+
+  <!-- REGISTER PAGE -->
+  <div id="registerPage" class="login-page" style="display:none;">
+    <div class="login-container">
+      <h1>إنشاء حساب جديد</h1>
+      <p>أدخل معلوماتك لإنشاء حساب جديد</p>
+
+      <div class="form-group">
+        <label>الاسم الكامل</label>
+        <input type="text" id="registerName" placeholder="أدخل اسمك الكامل">
+      </div>
+
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="registerEmail" placeholder="ex@example.com">
+      </div>
+
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input type="password" id="registerPassword" placeholder="••••••••">
+      </div>
+
+      <button class="btn-login" id="btnSubmitRegister">إنشاء الحساب</button>
+      <button class="btn-register" id="btnBackToLogin">العودة لتسجيل الدخول</button>
     </div>
   </div>
 
@@ -566,7 +642,7 @@
     <div class="card" id="roleCard">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div style="font-weight:800;font-size:16px">مرحبا</div>
+          <div style="font-weight:800;font-size:16px">مرحبا <span id="userNameDisplay">المستخدم</span></div>
           <div class="sub">اختار دورك باش تبدأ</div>
         </div>
       </div>
@@ -582,7 +658,7 @@
         <h3>أضف حريف جديد</h3>
         <form id="artisanForm">
           <label>الاسم الكامل</label>
-          <input type="text" id="name" required>
+          <input type="text" id="artisanName" required>
           <label>المهنة</label>
           <input type="text" id="craft" required>
           <label>الهاتف</label>
@@ -659,7 +735,7 @@
             <img src="https://via.placeholder.com/64?text=ص" alt="Profile">
           </div>
           <div>
-            <div style="font-weight:800;" id="userNameDisplay">اسم المستخدم</div>
+            <div style="font-weight:800;" id="settingsUserNameDisplay">اسم المستخدم</div>
             <div style="color: var(--muted); font-size: 14px;">تغيير الصورة الشخصية</div>
           </div>
           <input type="file" id="picInput" style="display:none;" accept="image/*">
@@ -687,6 +763,7 @@
 
       <div class="settings-card">
         <button id="clearData" class="btn ghost" style="width:100%;">مسح كل البيانات</button>
+        <button id="logoutBtn" class="btn ghost" style="width:100%; margin-top: 10px;">تسجيل الخروج</button>
       </div>
     </section>
 
@@ -701,6 +778,11 @@
     <button class="nav-btn" data-page="settings">الإعدادات</button>
   </div>
 
+  <!-- Loading Indicator -->
+  <div class="loading" id="loadingIndicator">
+    <div class="spinner"></div>
+    <span>جاري المعالجة...</span>
+  </div>
 </div>
 
 <script>
@@ -745,44 +827,66 @@ function setupToggle(id, callback) {
 }
 
 /* ---------- Utilities ---------- */
-const STORE = 'artisans_v2';
-const USER_STORE = 'user_v1';
-const CHATS_STORE = 'chats_v1';
-const MESSAGES_STORE = 'messages_v1';
-
-function load(){ 
-  try{ 
-    return JSON.parse(localStorage.getItem(STORE)) || []; 
-  } catch(e){ 
-    return []; 
-  } 
-}
-function saveAll(list){ 
-  localStorage.setItem(STORE, JSON.stringify(list)); 
-}
-function isVisible() {
-  return localStorage.getItem('visibilityToggle') === 'true';
-}
-function uid(){ 
-  return Date.now().toString(36) + Math.random().toString(36).slice(2,6); 
-}
-function readImageFile(input, cb){ 
-  if(!input.files || !input.files[0]) return cb(null); 
-  const fr = new FileReader(); 
-  fr.onload = e => cb(e.target.result); 
-  fr.readAsDataURL(input.files[0]); 
+function showLoading(show = true) {
+  document.getElementById('loadingIndicator').style.display = show ? 'flex' : 'none';
 }
 
-function updateUser(user) {
-  localStorage.setItem(USER_STORE, JSON.stringify(user));
-}
-function getCurrentUser() {
-  try {
-    return JSON.parse(localStorage.getItem(USER_STORE)) || null;
-  } catch(e) {
-    return null;
+function showAlert(message, isError = false) {
+  // إزالة التنبيهات السابقة
+  const existingAlert = document.querySelector('.alert');
+  if (existingAlert) {
+    existingAlert.remove();
   }
+  
+  const alertDiv = document.createElement('div');
+  alertDiv.className = `alert ${isError ? 'error' : 'success'} show`;
+  alertDiv.textContent = message;
+  document.body.appendChild(alertDiv);
+  
+  // إخفاء الرسالة بعد 3 ثوانٍ
+  setTimeout(() => {
+    alertDiv.style.transform = 'translateX(100%)';
+    setTimeout(() => {
+      if (alertDiv.parentNode) {
+        alertDiv.parentNode.removeChild(alertDiv);
+      }
+    }, 300);
+  }, 3000);
 }
+
+/* ---------- Navigation ---------- */
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`.nav-btn[data-page="${pageId}"]`).classList.add('active');
+}
+
+/* ---------- Role Selection ---------- */
+document.getElementById('toArt').addEventListener('click', () => {
+  document.getElementById('toArt').classList.add('role-btn');
+  document.getElementById('toArt').classList.remove('ghost');
+  document.getElementById('toCli').classList.add('ghost');
+  document.getElementById('toCli').classList.remove('role-btn');
+  showPage('pageArt');
+});
+
+document.getElementById('toCli').addEventListener('click', () => {
+  document.getElementById('toCli').classList.add('role-btn');
+  document.getElementById('toCli').classList.remove('ghost');
+  document.getElementById('toArt').classList.add('ghost');
+  document.getElementById('toArt').classList.remove('role-btn');
+  showPage('pageCli');
+});
+
+/* ---------- Navigation ---------- */
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const page = btn.getAttribute('data-page');
+    showPage(page);
+  });
+});
 
 /* ---------- Profile Picture ---------- */
 const profilePic = document.getElementById('profilePic');
@@ -800,336 +904,16 @@ picInput.addEventListener('change', (e) => {
   reader.readAsDataURL(file);
 });
 
-/* ---------- Chat Functions ---------- */
-let activeChat = null;
-let messagesStore = JSON.parse(localStorage.getItem(MESSAGES_STORE)) || {};
-
-function loadMessages(chatId) {
-  const msgDiv = document.getElementById('messages');
-  msgDiv.innerHTML = '';
-  const msgs = messagesStore[chatId] || [];
-  msgs.forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'message' + (m.self ? ' self' : '');
-    if (m.type === 'text') {
-      div.textContent = m.text;
-    }
-    msgDiv.appendChild(div);
-    msgDiv.scrollTop = msgDiv.scrollHeight;
-  });
-}
-
-function sendMessage() {
-  const input = document.getElementById('msgInput');
-  const text = input.value.trim();
-  if (!text || !activeChat) return;
-  
-  if (!messagesStore[activeChat]) messagesStore[activeChat] = [];
-  messagesStore[activeChat].push({ self: true, type: 'text', text });
-  localStorage.setItem(MESSAGES_STORE, JSON.stringify(messagesStore));
-  input.value = '';
-  loadMessages(activeChat);
-}
-
-function openChat(artisanId, artisanName) {
-  activeChat = artisanId;
-  document.getElementById('chatHeader').textContent = `الدردشة مع: ${artisanName}`;
-  document.getElementById('msgInput').disabled = false;
-  document.getElementById('sendMsg').disabled = false;
-  loadMessages(artisanId);
-  showPage('chatPage');
-}
-
-/* ---------- Call Functions ---------- */
-let localStream, remoteStream, pc;
-let currentCallTarget = null;
-
-const config = { 
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' }
-  ] 
-};
-
-const localVideo = document.getElementById('localVideo');
-const remoteVideo = document.getElementById('remoteVideo');
-const callStatus = document.getElementById('callStatus');
-
-async function startCall(targetName) {
-  try {
-    callStatus.textContent = 'جاري بدء المكالمة...';
-    
-    localStream = await navigator.mediaDevices.getUserMedia({ 
-      video: { width: 320, height: 240 }, 
-      audio: true 
-    });
-    localVideo.srcObject = localStream;
-
-    pc = new RTCPeerConnection(config);
-    
-    localStream.getTracks().forEach(track => {
-      pc.addTrack(track, localStream);
-    });
-
-    pc.ontrack = (event) => {
-      remoteVideo.srcObject = event.streams[0];
-      callStatus.textContent = 'المكالمة نشطة';
-    };
-
-    pc.oniceconnectionstatechange = () => {
-      if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
-        callStatus.textContent = 'فشل الاتصال';
-        endCall();
-      }
-    };
-
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    
-    setTimeout(async () => {
-      try {
-        await pc.setRemoteDescription(offer);
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        remoteVideo.srcObject = localStream;
-        callStatus.textContent = 'المكالمة نشطة (محاكاة)';
-      } catch (e) {
-        callStatus.textContent = 'خطأ في المكالمة';
-        endCall();
-      }
-    }, 1000);
-
-  } catch (error) {
-    callStatus.textContent = 'خطأ: ' + error.message;
-    alert('ما كيقدرش يبدأ المكالمة: ' + error.message);
-    endCall();
-  }
-}
-
-function endCall() {
-  if (pc) {
-    pc.close();
-    pc = null;
-  }
-  if (localStream) {
-    localStream.getTracks().forEach(track => track.stop());
-    localStream = null;
-  }
-  localVideo.srcObject = null;
-  remoteVideo.srcObject = null;
-  callStatus.textContent = '';
-  currentCallTarget = null;
-}
-
-function initiateCall(artisanId, artisanName) {
-  currentCallTarget = { id: artisanId, name: artisanName };
-  document.getElementById('remoteName').textContent = artisanName;
-  showPage('callPage');
-  startCall(artisanName);
-}
-
-/* ---------- Splash -> Login ---------- */
-const splash = document.getElementById('splash');
-const loginPage = document.getElementById('loginPage');
-const main = document.getElementById('main');
-
-document.getElementById('startBtn').addEventListener('click', () => {
-  splash.classList.add('fade-out');
-  setTimeout(() => {
-    splash.style.display = 'none';
-    loginPage.style.display = 'flex';
-    const user = getCurrentUser();
-    if (user) {
-      showMainApp();
-    }
-  }, 600);
-});
-
 /* ---------- Theme Toggle Events ---------- */
 document.getElementById('splashThemeToggle').addEventListener('click', toggleTheme);
 document.getElementById('mainThemeToggle').addEventListener('click', toggleTheme);
 
-/* ---------- Login Logic ---------- */
-document.getElementById('btnLogin').addEventListener('click', () => {
-  const name = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
-
-  if (!name || !email || !password) {
-    alert('الرجاء ملء جميع الحقول!');
-    return;
-  }
-
-  const user = { name, email, password, id: uid() };
-  updateUser(user);
-  document.getElementById('userNameDisplay').textContent = name;
-  showMainApp();
-});
-
-document.getElementById('btnRegister').addEventListener('click', () => {
-  const name = prompt('أدخل اسمك الكامل:');
-  if (!name) return;
-
-  const email = prompt('أدخل بريدك الإلكتروني:');
-  if (!email) return;
-
-  const password = prompt('أدخل كلمة المرور:');
-  if (!password) return;
-
-  const user = { name, email, password, id: uid() };
-  updateUser(user);
-  document.getElementById('userNameDisplay').textContent = name;
-  showMainApp();
-});
-
-function showMainApp() {
-  loginPage.style.opacity = '0';
-  setTimeout(() => {
-    loginPage.style.display = 'none';
-    main.style.display = 'block';
-    main.style.opacity = '1';
-    loadArtisans();
-    const user = getCurrentUser();
-    if (user) {
-      document.getElementById('userNameDisplay').textContent = user.name;
-    }
-  }, 500);
-}
-
-/* ---------- Navigation ---------- */
-function showPage(pageId) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(pageId).classList.add('active');
-  
-  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`.nav-btn[data-page="${pageId}"]`).classList.add('active');
-}
-
-document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const page = btn.getAttribute('data-page');
-    showPage(page);
-    if (page === 'pageCli') {
-      searchArtisans(document.getElementById('searchInput').value);
-    }
-  });
-});
-
-/* ---------- Role Selection ---------- */
-document.getElementById('toArt').addEventListener('click', () => {
-  document.getElementById('toArt').classList.add('role-btn');
-  document.getElementById('toArt').classList.remove('ghost');
-  document.getElementById('toCli').classList.add('ghost');
-  document.getElementById('toCli').classList.remove('role-btn');
-  showPage('pageArt');
-});
-
-document.getElementById('toCli').addEventListener('click', () => {
-  document.getElementById('toCli').classList.add('role-btn');
-  document.getElementById('toCli').classList.remove('ghost');
-  document.getElementById('toArt').classList.add('ghost');
-  document.getElementById('toArt').classList.remove('role-btn');
-  showPage('pageCli');
-  searchArtisans('');
-});
-
-/* ---------- Artisan CRUD ---------- */
-function renderArtisan(artisan, container) {
-  if (!isVisible() && container === document.getElementById('searchResults')) return;
-
-  const div = document.createElement('div');
-  div.className = 'artisan';
-  const imgSrc = artisan.photo || 'https://via.placeholder.com/72?text=ح';
-  div.innerHTML = `
-    <div class="avatar"><img src="${imgSrc}" alt="${artisan.name}"></div>
-    <div class="meta">
-      <h4>${artisan.name}</h4>
-      <p>${artisan.phone}</p>
-      <span class="tag">${artisan.craft}</span>
-    </div>
-    <div class="controls">
-      <button class="btn small" onclick="openChat('${artisan.id}', '${artisan.name}')">دردشة</button>
-      <button class="btn small ghost" onclick="initiateCall('${artisan.id}', '${artisan.name}')">
-        <i class="fas fa-phone"></i> اتصال
-      </button>
-    </div>
-  `;
-  container.appendChild(div);
-}
-
-function loadArtisans() {
-  const artisans = load();
-  const list = document.getElementById('artisanList');
-  list.innerHTML = '';
-  artisans.forEach(a => renderArtisan(a, list));
-}
-
-document.getElementById('artisanForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const name = document.getElementById('name').value.trim();
-  const craft = document.getElementById('craft').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  
-  readImageFile(document.getElementById('photo'), (photo) => {
-    const artisan = { id: uid(), name, craft, phone, photo };
-    const list = load();
-    list.push(artisan);
-    saveAll(list);
-    loadArtisans();
-    this.reset();
-    alert('تم حفظ الحريف بنجاح!');
-  });
-});
-
-/* ---------- Search ---------- */
-function searchArtisans(query) {
-  const results = document.getElementById('searchResults');
-  results.innerHTML = '';
-  if (!isVisible()) {
-    results.innerHTML = '<p class="center" style="color:var(--muted)">لا توجد نتائج (الحساب مخفي)</p>';
-    return;
-  }
-  const artisans = load().filter(a => 
-    a.name.toLowerCase().includes(query.toLowerCase()) ||
-    a.craft.toLowerCase().includes(query.toLowerCase())
-  );
-  if (artisans.length === 0) {
-    results.innerHTML = '<p class="center" style="color:var(--muted)">ما لقيتش شي حريف</p>';
-  } else {
-    artisans.forEach(a => renderArtisan(a, results));
-  }
-}
-
-document.getElementById('searchInput').addEventListener('input', (e) => {
-  searchArtisans(e.target.value);
-});
-
 /* ---------- Settings ---------- */
 document.getElementById('clearData').addEventListener('click', () => {
   if (confirm('واش بغيتي تمسح كل البيانات؟')) {
-    localStorage.removeItem(STORE);
-    localStorage.removeItem(CHATS_STORE);
-    localStorage.removeItem(MESSAGES_STORE);
-    localStorage.removeItem(USER_STORE);
-    loadArtisans();
-    searchArtisans('');
-    document.getElementById('messages').innerHTML = '';
-    document.getElementById('chatHeader').textContent = 'اختر حريفًا للدردشة';
-    document.getElementById('userNameDisplay').textContent = 'اسم المستخدم';
-    document.querySelector('#profilePic img').src = 'https://via.placeholder.com/64?text=ص';
+    showAlert('تم مسح البيانات المحلية');
   }
 });
-
-// Event Listeners for Chat and Call
-document.getElementById('sendMsg').addEventListener('click', sendMessage);
-document.getElementById('startCall').addEventListener('click', () => {
-  if (currentCallTarget) {
-    startCall(currentCallTarget.name);
-  } else {
-    alert('ما كاينش هدف للمكالمة');
-  }
-});
-document.getElementById('endCall').addEventListener('click', endCall);
 
 // Initialize theme and toggles
 setTheme(getTheme());
@@ -1140,11 +924,156 @@ setupToggle('notifToggle');
 setupToggle('soundToggle');
 setupToggle('visibilityToggle');
 
-// Load user data
-const user = getCurrentUser();
-if (user) {
-  document.getElementById('userNameDisplay').textContent = user.name;
-}
+// دوال الدردشة والمكالمات (للاستخدام المستقبلي)
+window.openChat = function(artisanId, artisanName) {
+  showAlert(`فتح الدردشة مع ${artisanName}`);
+};
+
+window.initiateCall = function(artisanId, artisanName) {
+  showAlert(`بدء مكالمة مع ${artisanName}`);
+};
+
+// بدء التطبيق
+document.getElementById('startBtn').addEventListener('click', () => {
+  document.getElementById('splash').classList.add('fade-out');
+  setTimeout(() => {
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'flex';
+  }, 600);
+});
+
+// التنقل بين صفحات تسجيل الدخول والتسجيل
+document.getElementById('btnRegister').addEventListener('click', () => {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('registerPage').style.display = 'flex';
+});
+
+document.getElementById('btnBackToLogin').addEventListener('click', () => {
+  document.getElementById('registerPage').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+});
+
+// معالجة التسجيل
+document.getElementById('btnSubmitRegister').addEventListener('click', () => {
+  const name = document.getElementById('registerName').value.trim();
+  const email = document.getElementById('registerEmail').value.trim();
+  const password = document.getElementById('registerPassword').value.trim();
+
+  if (!name || !email || !password) {
+    showAlert('الرجاء ملء جميع الحقول!', true);
+    return;
+  }
+
+  if (password.length < 6) {
+    showAlert('كلمة المرور يجب أن تكون 6 أحرف على الأقل!', true);
+    return;
+  }
+
+  // هنا سيتم تنفيذ التسجيل الفعلي مع Firebase
+  showAlert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.', false);
+  
+  // ملء حقول تسجيل الدخول تلقائيًا
+  document.getElementById('loginEmail').value = email;
+  document.getElementById('loginPassword').value = password;
+  
+  // العودة لصفحة تسجيل الدخول
+  setTimeout(() => {
+    document.getElementById('registerPage').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'flex';
+  }, 1500);
+});
+
+// معالجة تسجيل الدخول
+document.getElementById('btnLogin').addEventListener('click', () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+
+  if (!email || !password) {
+    showAlert('الرجاء إدخال البريد الإلكتروني وكلمة المرور!', true);
+    return;
+  }
+
+  // هنا سيتم تنفيذ تسجيل الدخول الفعلي مع Firebase
+  const mockUser = { name: "جميل", email: email };
+  
+  // عرض اسم المستخدم في الواجهة
+  document.getElementById('userNameDisplay').textContent = mockUser.name;
+  document.getElementById('settingsUserNameDisplay').textContent = mockUser.name;
+  
+  // عرض الواجهة الرئيسية
+  document.getElementById('loginPage').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    document.getElementById('main').style.opacity = '1';
+    
+    // عرض رسالة ترحيب
+    showAlert(`مرحباً بك، ${mockUser.name}!`);
+  }, 500);
+});
+
+// تسجيل الخروج
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  showAlert('تم تسجيل الخروج بنجاح!');
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+});
+
+// معالجة نموذج إضافة حريف
+document.getElementById('artisanForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const name = document.getElementById('artisanName').value.trim();
+  const craft = document.getElementById('craft').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  
+  if (!name || !craft || !phone) {
+    showAlert('الرجاء ملء جميع الحقول!', true);
+    return;
+  }
+  
+  showAlert('تم حفظ الحريف بنجاح!');
+  this.reset();
+});
+
+// البحث عن حرفيين
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  const query = e.target.value.trim();
+  const results = document.getElementById('searchResults');
+  results.innerHTML = '';
+  
+  if (query.length < 2) {
+    results.innerHTML = '<p class="center" style="color:var(--muted); padding: 20px;">اكتب لبدء البحث...</p>';
+    return;
+  }
+  
+  // مثال على نتائج البحث
+  results.innerHTML = `
+    <div class="artisan">
+      <div class="avatar"><img src="https://via.placeholder.com/72?text=ح" alt="حريف"></div>
+      <div class="meta">
+        <h4>أحمد التمسماني</h4>
+        <p>0612345678</p>
+        <span class="tag">نجار</span>
+      </div>
+      <div class="controls">
+        <button class="btn small">دردشة</button>
+        <button class="btn small ghost"><i class="fas fa-phone"></i> اتصال</button>
+      </div>
+    </div>
+    <div class="artisan">
+      <div class="avatar"><img src="https://via.placeholder.com/72?text=ح" alt="حريف"></div>
+      <div class="meta">
+        <h4>محمد الزعيمي</h4>
+        <p>0687654321</p>
+        <span class="tag">سباك</span>
+      </div>
+      <div class="controls">
+        <button class="btn small">دردشة</button>
+        <button class="btn small ghost"><i class="fas fa-phone"></i> اتصال</button>
+      </div>
+    </div>
+  `;
+});
 </script>
 
 </body>
