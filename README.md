@@ -336,6 +336,16 @@
     text-align: center;
     font-weight: 700;
     color: var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .chat-header .back-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 18px;
   }
   .messages {
     flex: 1;
@@ -354,11 +364,18 @@
     word-wrap: break-word;
     align-self: flex-start;
     color: var(--text);
+    position: relative;
   }
   .message.self {
     background: var(--accent-light);
     color: var(--accent);
     align-self: flex-end;
+  }
+  .message-time {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+    text-align: right;
   }
   .chat-input {
     display: flex;
@@ -383,6 +400,10 @@
   }
   .chat-input button:hover {
     background: #0f8a4d;
+  }
+  .chat-input button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
   }
 
   /* Settings Page */
@@ -691,11 +712,17 @@
 
     <section id="chatPage" class="page">
       <div class="card">
-        <div class="chat-header" id="chatHeader">اختر حريفًا للدردشة</div>
+        <div class="chat-header" id="chatHeader">
+          <button class="back-btn" id="backToSearch">
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <span id="chatTitle">الدردشة</span>
+          <span></span> <!-- للحفاظ على التوازن -->
+        </div>
         <div class="messages" id="messages"></div>
         <div class="chat-input">
-          <input type="text" id="msgInput" placeholder="اكتب رسالة..." disabled>
-          <button id="sendMsg" disabled><i class="fas fa-paper-plane"></i></button>
+          <input type="text" id="msgInput" placeholder="اكتب رسالة..." maxlength="500">
+          <button id="sendMsg"><i class="fas fa-paper-plane"></i></button>
         </div>
       </div>
     </section>
@@ -860,7 +887,10 @@ function showPage(pageId) {
   document.getElementById(pageId).classList.add('active');
   
   document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`.nav-btn[data-page="${pageId}"]`).classList.add('active');
+  const navBtn = document.querySelector(`.nav-btn[data-page="${pageId}"]`);
+  if (navBtn) {
+    navBtn.classList.add('active');
+  }
 }
 
 /* ---------- Role Selection ---------- */
@@ -924,14 +954,73 @@ setupToggle('notifToggle');
 setupToggle('soundToggle');
 setupToggle('visibilityToggle');
 
-// دوال الدردشة والمكالمات (للاستخدام المستقبلي)
-window.openChat = function(artisanId, artisanName) {
-  showAlert(`فتح الدردشة مع ${artisanName}`);
-};
+// متغيرات الدردشة
+let currentChat = null;
+let currentUser = { name: "جميل", id: "user123" }; // مثال على المستخدم الحالي
 
-window.initiateCall = function(artisanId, artisanName) {
-  showAlert(`بدء مكالمة مع ${artisanName}`);
-};
+// دالة لعرض رسالة في الدردشة
+function addMessageToChat(text, isSelf = false, timestamp = new Date()) {
+  const messagesContainer = document.getElementById('messages');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `message ${isSelf ? 'self' : ''}`;
+  
+  messageDiv.innerHTML = `
+    ${text}
+    <div class="message-time">${timestamp.toLocaleTimeString('ar-MA', { hour: '2-digit', minute: '2-digit' })}</div>
+  `;
+  
+  messagesContainer.appendChild(messageDiv);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// دالة لفتح الدردشة مع حريف
+function openChat(artisanId, artisanName) {
+  currentChat = { id: artisanId, name: artisanName };
+  document.getElementById('chatTitle').textContent = artisanName;
+  document.getElementById('messages').innerHTML = '';
+  
+  // إضافة بعض الرسائل التوضيحية
+  addMessageToChat(`مرحباً! أنا ${currentUser.name}، كيف يمكنني مساعدتك اليوم؟`, false);
+  addMessageToChat('أهلاً بك! كيف يمكنني مساعدتك؟', true, new Date(Date.now() - 300000)); // قبل 5 دقائق
+  
+  showPage('chatPage');
+}
+
+// معالجة إرسال الرسالة
+document.getElementById('sendMsg').addEventListener('click', () => {
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  
+  if (!text || !currentChat) return;
+  
+  addMessageToChat(text, true);
+  input.value = '';
+  
+  // محاكاة رد من الطرف الآخر بعد ثانية
+  setTimeout(() => {
+    const responses = [
+      "شكراً على رسالتك!",
+      "أفهم ما تقصد، سأقوم بمساعدتك.",
+      "هل تحتاج إلى مساعدة إضافية؟",
+      "سأكون سعيداً بمساعدتك في هذا الأمر.",
+      "هل يمكنك توضيح أكثر؟"
+    ];
+    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+    addMessageToChat(randomResponse, false);
+  }, 1000);
+});
+
+// السماح بإرسال الرسالة بالضغط على Enter
+document.getElementById('msgInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    document.getElementById('sendMsg').click();
+  }
+});
+
+// العودة إلى صفحة البحث من الدردشة
+document.getElementById('backToSearch').addEventListener('click', () => {
+  showPage('pageCli');
+});
 
 // بدء التطبيق
 document.getElementById('startBtn').addEventListener('click', () => {
@@ -969,7 +1058,6 @@ document.getElementById('btnSubmitRegister').addEventListener('click', () => {
     return;
   }
 
-  // هنا سيتم تنفيذ التسجيل الفعلي مع Firebase
   showAlert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.', false);
   
   // ملء حقول تسجيل الدخول تلقائيًا
@@ -993,12 +1081,11 @@ document.getElementById('btnLogin').addEventListener('click', () => {
     return;
   }
 
-  // هنا سيتم تنفيذ تسجيل الدخول الفعلي مع Firebase
-  const mockUser = { name: "جميل", email: email };
+  currentUser.name = "جميل"; // في التطبيق الفعلي، سيتم جلب الاسم من قاعدة البيانات
   
   // عرض اسم المستخدم في الواجهة
-  document.getElementById('userNameDisplay').textContent = mockUser.name;
-  document.getElementById('settingsUserNameDisplay').textContent = mockUser.name;
+  document.getElementById('userNameDisplay').textContent = currentUser.name;
+  document.getElementById('settingsUserNameDisplay').textContent = currentUser.name;
   
   // عرض الواجهة الرئيسية
   document.getElementById('loginPage').style.opacity = '0';
@@ -1008,15 +1095,31 @@ document.getElementById('btnLogin').addEventListener('click', () => {
     document.getElementById('main').style.opacity = '1';
     
     // عرض رسالة ترحيب
-    showAlert(`مرحباً بك، ${mockUser.name}!`);
+    showAlert(`مرحباً بك، ${currentUser.name}!`);
   }, 500);
 });
 
-// تسجيل الخروج
+// تسجيل الخروج - العودة إلى صفحة البداية
 document.getElementById('logoutBtn').addEventListener('click', () => {
   showAlert('تم تسجيل الخروج بنجاح!');
-  document.getElementById('main').style.display = 'none';
-  document.getElementById('loginPage').style.display = 'flex';
+  
+  // إخفاء الواجهة الرئيسية
+  document.getElementById('main').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('main').style.display = 'none';
+    
+    // عرض صفحة البداية (Splash Screen)
+    document.getElementById('splash').style.display = 'flex';
+    document.getElementById('splash').classList.remove('fade-out');
+    
+    // إعادة تعيين الحقول
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('registerName').value = '';
+    document.getElementById('registerEmail').value = '';
+    document.getElementById('registerPassword').value = '';
+    currentChat = null;
+  }, 500);
 });
 
 // معالجة نموذج إضافة حريف
@@ -1056,7 +1159,7 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
         <span class="tag">نجار</span>
       </div>
       <div class="controls">
-        <button class="btn small">دردشة</button>
+        <button class="btn small" onclick="openChat('artisan1', 'أحمد التمسماني')">دردشة</button>
         <button class="btn small ghost"><i class="fas fa-phone"></i> اتصال</button>
       </div>
     </div>
@@ -1068,11 +1171,24 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
         <span class="tag">سباك</span>
       </div>
       <div class="controls">
-        <button class="btn small">دردشة</button>
+        <button class="btn small" onclick="openChat('artisan2', 'محمد الزعيمي')">دردشة</button>
         <button class="btn small ghost"><i class="fas fa-phone"></i> اتصال</button>
       </div>
     </div>
   `;
+});
+
+// دوال المكالمات (للاستخدام المستقبلي)
+document.getElementById('startCall').addEventListener('click', () => {
+  if (!currentChat) {
+    showAlert('يرجى فتح دردشة أولاً', true);
+    return;
+  }
+  showAlert(`بدء مكالمة مع ${currentChat.name}`);
+});
+
+document.getElementById('endCall').addEventListener('click', () => {
+  showAlert('تم إنهاء المكالمة');
 });
 </script>
 
